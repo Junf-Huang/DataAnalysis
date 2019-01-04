@@ -71,7 +71,6 @@ class phoneSpider(scrapy.Spider):  #需要继承scrapy.Spider类
         # 一旦item[]被赋值，则直接调用pipelines里的处理代码，所以只能赋值一次
         item['brand'] = original 
 
-        
         item['name'] = extract_with_css('div.desc::text').strip('商品名称：')
         # match只从字符串开头匹配
         item['price'] = extract_with_css('span.number::text')

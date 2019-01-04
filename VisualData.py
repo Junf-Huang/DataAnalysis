@@ -1,13 +1,14 @@
 import openpyxl
 
 from wordcloud import WordCloud
-from matplotlib import pyplot as plt 
+import matplotlib
+from matplotlib import pyplot as plt
 
-import plotly 
+import plotly
 import plotly.plotly as py
 import plotly.graph_objs as go
-plotly.tools.set_credentials_file(username='Junf-Huang', api_key='UcLG1VBERu4MiPHw7wXp')
-
+plotly.tools.set_credentials_file(
+    username='Junf-Huang', api_key='UcLG1VBERu4MiPHw7wXp')
 
 wb = openpyxl.load_workbook('gzjs/phone.xlsx')
 sheet = wb["statistic"]
@@ -19,7 +20,7 @@ salesVolume = sheet.cell(row=start_row, column=2).value
 print('name:', name)
 print('salesVolume:', salesVolume)
 
-# 从第二行开始，记录统计数据  
+# 从第二行开始，记录统计数据
 # 数据过多，截取前20
 x = []
 y = []
@@ -32,81 +33,105 @@ for i in range(start_row, end_row + 1):
     x.append(sheet.cell(row=i, column=1).value)
     y.append(sheet.cell(row=i, column=2).value)
 
-print ("x: ", x)
-print ("y: ", y)
-
+print("x: ", x)
+print("y: ", y)
 
 # 读取品牌、销量的条形图、饼图
-# python wordcloud 
-data = [go.Bar(
-            x = x,
-            y = y,
-            name = salesVolume,
-            width = [0.8],
-            marker = dict(color='rgb(31, 119, 180)')
-    )]
+# python wordcloud
+data = [
+    go.Bar(
+        x=x,
+        y=y,
+        name=salesVolume,
+        width=[0.8],
+        marker=dict(color='rgb(31, 119, 180)'))
+]
 
 py.iplot(data, filename='basic-bar')
-
 
 trace = go.Pie(labels=x, values=y)
 py.iplot([trace], filename='basic_pie_chart')
 
 sheet = wb["comment"]
 #情感倾向图
-title = []
 values = []
 strings = []
 label = ['好', '坏']
+titles = ['nubia Z18', '百合 C18']
 start_row += 1
 end_row = 4
 for i in range(start_row, end_row + 1):
-    title.append(sheet.cell(row=i, column=1).value)
     values.append(float(sheet.cell(row=i, column=2).value))
     strings.append(sheet.cell(row=i, column=3).value)
 
 fig = {
-    'data': [
-        {
-            'labels': label,
-            'values': [values[0], 1-values[0]],
-            'type': 'pie',
-            'name': title[0],
-            'marker': {'colors': ['rgb(255, 127, 14)',
-                                  'rgb(31, 119, 180)']},
-            'domain': {'x': [0, .48],
-                       'y': [0, .49]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none'
+    'data': [{
+        'labels': label,
+        'values': [values[0], 1 - values[0]],
+        'type': 'pie',
+        'name': titles[0],
+        'marker': {
+            'colors': ['rgb(255, 127, 14)', 'rgb(31, 119, 180)']
         },
-        {
-            'labels': label,
-            'values': [values[1], 1-values[1]],
-            'marker': {'colors': ['rgb(255, 127, 14)',
-                                  'rgb(31, 119, 180)']},
-            'type': 'pie',
-            'name':title[1],
-            'domain': {'x': [.52, 1],
-                       'y': [0, .49]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none'
-        }
-    ],
-    'layout': {'title': 'Commodity Sentiment Analysis',
-               'showlegend': False}
+        'domain': {
+            'x': [0, .48],
+            'y': [.51, 1]
+        },
+        'hoverinfo': 'label+percent+name'
+    },
+             {
+                 'labels': label,
+                 'values': [values[1], 1 - values[1]],
+                 'marker': {
+                     'colors': ['rgb(255, 127, 14)', 'rgb(31, 119, 180)']
+                 },
+                 'type': 'pie',
+                 'name': titles[1],
+                 'domain': {
+                     'x': [.52, 1],
+                     'y': [.51, 1]
+                 },
+                 'hoverinfo': 'label+percent+name'
+             }],
+    'layout': {
+        'title':
+        'Commodity Sentiment Analysis',
+        "annotations": [{
+            "font": {
+                "size": 20
+            },
+            "showarrow": False,
+            "text": "nubia Z18",
+            "x": 0.20,
+            "y": 0.5
+        },
+                        {
+                            "font": {
+                                "size": 20
+                            },
+                            "showarrow": False,
+                            "text": "百合 C18",
+                            "x": 0.8,
+                            "y": 0.5
+                        }],
+    }
 }
 
 py.iplot(fig, filename='pie_chart_subplots')
 
+zhfont = matplotlib.font_manager.FontProperties(
+    fname='/usr/share/fonts/adobe-source-han-sans/SourceHanSansCN-Regular.otf')
 #典型意见词云图
-for string in strings:  
+for string, title in zip(strings, titles):
     font = '/usr/share/fonts/adobe-source-han-sans/SourceHanSansCN-Regular.otf'
-    wc = WordCloud(font_path=font, #如果是中文必须要添加这个，否则会显示成框框
-                   background_color='white',
-                   width=1000,
-                   height=800,
-                   ).generate(string)
-    wc.to_file('word.png') #保存图片
+    wc = WordCloud(
+        font_path=font,  #如果是中文必须要添加这个，否则会显示成框框
+        background_color='white',
+        width=1000,
+        height=800,
+    ).generate(string)
+    wc.to_file('word.png')  #保存图片
     plt.imshow(wc)  #用plt显示图片
-    plt.axis('off') #不显示坐标轴
-    plt.show() #显示图片
+    plt.axis('off')  #不显示坐标轴
+    plt.title(title, fontproperties=zhfont)
+    plt.show()  #显示图片

@@ -19,7 +19,6 @@ salesVolume = sheet.cell(row=start_row, column=4).value
 print('price:', price)
 print('salesVolume:', salesVolume)
 
-
 start_row += 1
 x = []
 y = []
